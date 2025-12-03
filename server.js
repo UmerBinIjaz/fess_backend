@@ -4,7 +4,7 @@ const cors = require('cors');
 const path = require('path');
 const multer = require('multer');
 
-const db = require('./Config/db'); // Database connection
+const db = require('./config/db'); // Database connection
 const adminControllers = require('./Controllers/admincontrollers');
 const studentControllers = require('./Controllers/studentcontrollers');
 
