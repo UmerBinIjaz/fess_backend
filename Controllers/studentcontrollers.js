@@ -192,29 +192,66 @@ exports.getCandidatesByDesignationAndHouse = (req, res) => {
     res.json(results);
   });
 };
+// =========================
+// GET ALL CANDIDATES
+// =========================
+exports.getCandidatesByDesignationAndHouse = (req, res) => {
+  db.query("SELECT * FROM candidates", (err, results) => {
+    if (err)
+      return res.status(500).json({ error: "Failed to fetch candidates." });
 
-// Cast vote
+    res.json(results);
+  });
+};
+
+// =========================
+// GET STUDENT BY REG
+// =========================
+exports.getStudentByReg = (req, res) => {
+  const reg = req.params.reg;
+
+  db.query("SELECT * FROM student WHERE reg = ?", [reg], (err, results) => {
+    if (err) return res.status(500).json({ error: "Server error" });
+
+    if (results.length === 0)
+      return res.status(404).json({ error: "Student not found" });
+
+    return res.json(results[0]);
+  });
+};
+
+// =========================
+// CAST VOTE (ADD THIS!)
+// =========================
 exports.castVote = (req, res) => {
   const { studentId, votes } = req.body;
-  if (!studentId || !votes) return res.status(400).json({ error: 'Invalid vote data.' });
 
-  // Build insert object dynamically based on house and designation
+  if (!studentId || !votes) {
+    return res.status(400).json({ error: "Invalid vote data." });
+  }
+
   const voteData = { student_id: studentId };
+
   for (const house in votes) {
     for (const designation in votes[house]) {
-      const columnName = `${house}_${designation.replace(/\s+/g, '_')}_id`;
+      const columnName = `${house}_${designation.replace(/\s+/g, "_")}_id`;
       voteData[columnName] = votes[house][designation];
     }
   }
 
-  // Check if student already voted
-  db.query('SELECT * FROM votes WHERE student_id = ?', [studentId], (err, results) => {
-    if (err) return res.status(500).json({ error: 'Database error' });
-    if (results.length > 0) return res.status(400).json({ error: 'You have already voted!' });
+  // Check if already voted
+  db.query("SELECT * FROM votes WHERE student_id = ?", [studentId], (err, results) => {
+    if (err) return res.status(500).json({ error: "Database error" });
 
-    db.query('INSERT INTO votes SET ?', voteData, (err, result) => {
-      if (err) return res.status(500).json({ error: 'Failed to submit vote.' });
-      res.json({ message: 'Vote submitted successfully!' });
+    if (results.length > 0) {
+      return res.status(400).json({ error: "You have already voted!" });
+    }
+
+    db.query("INSERT INTO votes SET ?", voteData, (err) => {
+      if (err) return res.status(500).json({ error: "Failed to submit vote." });
+
+      res.json({ message: "Vote submitted successfully!" });
     });
   });
+
 };
