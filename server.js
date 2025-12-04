@@ -68,6 +68,7 @@ app.post('/api/admin/vote-results', adminControllers.getVoteResults);
 
 // Get all candidates
 app.get("/api/student/getCandidates", studentControllers.getCandidatesByDesignationAndHouse);
+app.get("/api/student/getStudentByReg/:reg", studentControllers.getStudentByReg);
 
 // Cast vote
 app.post("/api/student/castVote", studentControllers.castVote);
